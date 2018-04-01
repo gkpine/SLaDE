@@ -44,6 +44,8 @@
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.btnRun = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.lblHwnd = new System.Windows.Forms.ToolStripLabel();
+            this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.lblStatus = new System.Windows.Forms.ToolStripLabel();
             this.panConsoleArea = new System.Windows.Forms.Panel();
             this.panInput = new System.Windows.Forms.Panel();
@@ -59,6 +61,10 @@
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.checkScriptTaskStatusToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripSeparator();
+            this.windowHandleSelectorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.bitmapSelectorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.colourSelectorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.licensingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.freeIconsByIcons8ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.txtEditor = new FastColoredTextBoxNS.FastColoredTextBox();
@@ -90,7 +96,7 @@
             this.txtOutput.Name = "txtOutput";
             this.txtOutput.ReadOnly = true;
             this.txtOutput.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.txtOutput.Size = new System.Drawing.Size(528, 137);
+            this.txtOutput.Size = new System.Drawing.Size(775, 166);
             this.txtOutput.TabIndex = 14;
             // 
             // txtInput
@@ -99,13 +105,13 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.txtInput.Location = new System.Drawing.Point(87, 2);
             this.txtInput.Name = "txtInput";
-            this.txtInput.Size = new System.Drawing.Size(363, 22);
+            this.txtInput.Size = new System.Drawing.Size(610, 22);
             this.txtInput.TabIndex = 7;
             // 
             // btnInput
             // 
             this.btnInput.Dock = System.Windows.Forms.DockStyle.Right;
-            this.btnInput.Location = new System.Drawing.Point(453, 0);
+            this.btnInput.Location = new System.Drawing.Point(700, 0);
             this.btnInput.Name = "btnInput";
             this.btnInput.Size = new System.Drawing.Size(75, 27);
             this.btnInput.TabIndex = 8;
@@ -128,10 +134,12 @@
             this.toolStripSeparator2,
             this.btnRun,
             this.toolStripSeparator3,
+            this.lblHwnd,
+            this.toolStripSeparator5,
             this.lblStatus});
             this.tsControls.Location = new System.Drawing.Point(0, 24);
             this.tsControls.Name = "tsControls";
-            this.tsControls.Size = new System.Drawing.Size(528, 36);
+            this.tsControls.Size = new System.Drawing.Size(775, 36);
             this.tsControls.TabIndex = 9;
             this.tsControls.Text = "toolStrip1";
             // 
@@ -223,6 +231,18 @@
             this.toolStripSeparator3.Name = "toolStripSeparator3";
             this.toolStripSeparator3.Size = new System.Drawing.Size(6, 36);
             // 
+            // lblHwnd
+            // 
+            this.lblHwnd.Name = "lblHwnd";
+            this.lblHwnd.Size = new System.Drawing.Size(157, 33);
+            this.lblHwnd.Text = "Global Window Handle: N/A";
+            this.lblHwnd.Click += new System.EventHandler(this.lblHwnd_Click);
+            // 
+            // toolStripSeparator5
+            // 
+            this.toolStripSeparator5.Name = "toolStripSeparator5";
+            this.toolStripSeparator5.Size = new System.Drawing.Size(6, 36);
+            // 
             // lblStatus
             // 
             this.lblStatus.Name = "lblStatus";
@@ -237,7 +257,7 @@
             this.panConsoleArea.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panConsoleArea.Location = new System.Drawing.Point(0, 0);
             this.panConsoleArea.Name = "panConsoleArea";
-            this.panConsoleArea.Size = new System.Drawing.Size(528, 164);
+            this.panConsoleArea.Size = new System.Drawing.Size(775, 193);
             this.panConsoleArea.TabIndex = 11;
             // 
             // panInput
@@ -246,9 +266,9 @@
             this.panInput.Controls.Add(this.txtInput);
             this.panInput.Controls.Add(this.btnInput);
             this.panInput.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panInput.Location = new System.Drawing.Point(0, 137);
+            this.panInput.Location = new System.Drawing.Point(0, 166);
             this.panInput.Name = "panInput";
-            this.panInput.Size = new System.Drawing.Size(528, 27);
+            this.panInput.Size = new System.Drawing.Size(775, 27);
             this.panInput.TabIndex = 2;
             // 
             // lnkClearConsole
@@ -271,7 +291,7 @@
             this.licensingToolStripMenuItem});
             this.msMenu.Location = new System.Drawing.Point(0, 0);
             this.msMenu.Name = "msMenu";
-            this.msMenu.Size = new System.Drawing.Size(528, 24);
+            this.msMenu.Size = new System.Drawing.Size(775, 24);
             this.msMenu.TabIndex = 13;
             this.msMenu.Text = "menuStrip1";
             // 
@@ -341,7 +361,11 @@
             // toolsToolStripMenuItem
             // 
             this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.checkScriptTaskStatusToolStripMenuItem});
+            this.checkScriptTaskStatusToolStripMenuItem,
+            this.toolStripMenuItem3,
+            this.windowHandleSelectorToolStripMenuItem,
+            this.colourSelectorToolStripMenuItem,
+            this.bitmapSelectorToolStripMenuItem});
             this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
             this.toolsToolStripMenuItem.Size = new System.Drawing.Size(47, 20);
             this.toolsToolStripMenuItem.Text = "&Tools";
@@ -349,9 +373,35 @@
             // checkScriptTaskStatusToolStripMenuItem
             // 
             this.checkScriptTaskStatusToolStripMenuItem.Name = "checkScriptTaskStatusToolStripMenuItem";
-            this.checkScriptTaskStatusToolStripMenuItem.Size = new System.Drawing.Size(210, 22);
-            this.checkScriptTaskStatusToolStripMenuItem.Text = "Check script thread status";
+            this.checkScriptTaskStatusToolStripMenuItem.Size = new System.Drawing.Size(225, 22);
+            this.checkScriptTaskStatusToolStripMenuItem.Text = "Script Thread Status (Debug)";
             this.checkScriptTaskStatusToolStripMenuItem.Click += new System.EventHandler(this.checkScriptTaskStatusToolStripMenuItem_Click);
+            // 
+            // toolStripMenuItem3
+            // 
+            this.toolStripMenuItem3.Name = "toolStripMenuItem3";
+            this.toolStripMenuItem3.Size = new System.Drawing.Size(222, 6);
+            // 
+            // windowHandleSelectorToolStripMenuItem
+            // 
+            this.windowHandleSelectorToolStripMenuItem.Name = "windowHandleSelectorToolStripMenuItem";
+            this.windowHandleSelectorToolStripMenuItem.Size = new System.Drawing.Size(225, 22);
+            this.windowHandleSelectorToolStripMenuItem.Text = "Window Handle Selector";
+            this.windowHandleSelectorToolStripMenuItem.Click += new System.EventHandler(this.windowHandleSelectorToolStripMenuItem_Click);
+            // 
+            // bitmapSelectorToolStripMenuItem
+            // 
+            this.bitmapSelectorToolStripMenuItem.Name = "bitmapSelectorToolStripMenuItem";
+            this.bitmapSelectorToolStripMenuItem.Size = new System.Drawing.Size(225, 22);
+            this.bitmapSelectorToolStripMenuItem.Text = "Bitmap Selector";
+            this.bitmapSelectorToolStripMenuItem.Click += new System.EventHandler(this.bitmapSelectorToolStripMenuItem_Click);
+            // 
+            // colourSelectorToolStripMenuItem
+            // 
+            this.colourSelectorToolStripMenuItem.Name = "colourSelectorToolStripMenuItem";
+            this.colourSelectorToolStripMenuItem.Size = new System.Drawing.Size(225, 22);
+            this.colourSelectorToolStripMenuItem.Text = "Colour Selector";
+            this.colourSelectorToolStripMenuItem.Click += new System.EventHandler(this.colourSelectorToolStripMenuItem_Click);
             // 
             // licensingToolStripMenuItem
             // 
@@ -400,7 +450,7 @@
             this.txtEditor.SelectionColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(255)))));
             this.txtEditor.ServiceColors = ((FastColoredTextBoxNS.ServiceColors)(resources.GetObject("txtEditor.ServiceColors")));
             this.txtEditor.ShowFoldingLines = true;
-            this.txtEditor.Size = new System.Drawing.Size(528, 215);
+            this.txtEditor.Size = new System.Drawing.Size(775, 251);
             this.txtEditor.TabIndex = 0;
             this.txtEditor.Zoom = 100;
             // 
@@ -408,9 +458,9 @@
             // 
             this.ssData.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.lblCoordinates});
-            this.ssData.Location = new System.Drawing.Point(0, 443);
+            this.ssData.Location = new System.Drawing.Point(0, 508);
             this.ssData.Name = "ssData";
-            this.ssData.Size = new System.Drawing.Size(528, 22);
+            this.ssData.Size = new System.Drawing.Size(775, 22);
             this.ssData.TabIndex = 10;
             this.ssData.Text = "statusStrip1";
             // 
@@ -440,8 +490,8 @@
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.panConsoleArea);
-            this.splitContainer1.Size = new System.Drawing.Size(528, 383);
-            this.splitContainer1.SplitterDistance = 215;
+            this.splitContainer1.Size = new System.Drawing.Size(775, 448);
+            this.splitContainer1.SplitterDistance = 251;
             this.splitContainer1.TabIndex = 15;
             // 
             // tmrBackup
@@ -452,7 +502,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(528, 465);
+            this.ClientSize = new System.Drawing.Size(775, 530);
             this.Controls.Add(this.splitContainer1);
             this.Controls.Add(this.tsControls);
             this.Controls.Add(this.msMenu);
@@ -461,6 +511,7 @@
             this.MainMenuStrip = this.msMenu;
             this.Name = "frmMain";
             this.Text = "SLaDE";
+            this.Load += new System.EventHandler(this.frmMain_Load);
             this.tsControls.ResumeLayout(false);
             this.tsControls.PerformLayout();
             this.panConsoleArea.ResumeLayout(false);
@@ -519,6 +570,12 @@
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem2;
         private System.Windows.Forms.Timer tmrBackup;
+        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem3;
+        private System.Windows.Forms.ToolStripMenuItem windowHandleSelectorToolStripMenuItem;
+        private System.Windows.Forms.ToolStripLabel lblHwnd;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
+        private System.Windows.Forms.ToolStripMenuItem bitmapSelectorToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem colourSelectorToolStripMenuItem;
     }
 }
 

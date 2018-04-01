@@ -71,6 +71,12 @@
     <Compile Include="frmClips.Designer.cs">
       <DependentUpon>frmClips.cs</DependentUpon>
     </Compile>
+    <Compile Include="frmHandleSelector.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmHandleSelector.Designer.cs">
+      <DependentUpon>frmHandleSelector.cs</DependentUpon>
+    </Compile>
     <Compile Include="frmMain.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -91,6 +97,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="frmClips.resx">
       <DependentUpon>frmClips.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmHandleSelector.resx">
+      <DependentUpon>frmHandleSelector.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="frmMain.resx">
       <DependentUpon>frmMain.cs</DependentUpon>
@@ -148,6 +157,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\AvalonEditLicense.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\restart_24px.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\copy_16px.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

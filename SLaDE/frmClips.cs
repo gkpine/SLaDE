@@ -22,13 +22,12 @@ namespace SLaDE
             Startup.CheckClipsDir(clipsdir);
             lstClipNames.Sorted = true;
             RefreshClipBin(clipsdir);
-        }
+        }  
 
         private void btnAdd_Click(object sender, EventArgs e)
         {
             frmAddNewClip frm = new frmAddNewClip(clipsdir);
             if (frm.ShowDialog() != DialogResult.OK) return;
-
             
             RefreshClipBin(clipsdir);
         }
@@ -70,6 +69,9 @@ namespace SLaDE
                 FileInfo fi = new FileInfo(filestr);
                 lstClipNames.Items.Add(fi.Name);
             }
+
+
+            txtClip.Text = "";
         }
 
         private void btnEdit_Click(object sender, EventArgs e)

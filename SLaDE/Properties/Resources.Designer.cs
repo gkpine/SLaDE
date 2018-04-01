@@ -118,6 +118,16 @@ namespace SLaDE.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap copy_16px {
+            get {
+                object obj = ResourceManager.GetObject("copy_16px", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Open_16px {
             get {
                 object obj = ResourceManager.GetObject("Open_16px", resourceCulture);
@@ -131,6 +141,16 @@ namespace SLaDE.Properties {
         internal static System.Drawing.Bitmap Play_16px {
             get {
                 object obj = ResourceManager.GetObject("Play_16px", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap restart_24px {
+            get {
+                object obj = ResourceManager.GetObject("restart_24px", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

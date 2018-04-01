@@ -20,6 +20,13 @@ namespace SLaDE
 
     public partial class frmMain : Form
     {
+        public const string CurrentVersion = "alpha";
+
+
+        // We run into access issues if the GlobalHwnd is IntPtr,
+        // and since we only ever use it as a string it will be 
+        // stored as such.
+        public string GlobalHwnd = "N/A";
 
         private string SytheLibExecutable;
         private string DataDirectory;
@@ -36,6 +43,15 @@ namespace SLaDE
 
         private bool isDirty = false;
         private bool isRunning = false;
+
+        // Used to silence the process listener events when running script
+        // based tools
+        private bool SilentPipe = false;
+
+        private enum Selector
+        {
+            SLBitmap, SLColour, BluBitmap, BluColour
+        }
 
         #region Variable Init and Data Checks (Startup)
 
@@ -91,20 +107,96 @@ namespace SLaDE
 
         #endregion
 
+        #region Tool Selectors
+
+        private void RunToolScript(Selector selector)
+        {
+
+            if (GlobalHwnd == "N/A")
+            {
+                var result = MessageBox.Show("You cannot use a colour or bitmap selector without first setting a global window handle. Would you like to set a global window handle now?", "Handle", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Exclamation);
+                if (result == DialogResult.Yes) windowHandleSelectorToolStripMenuItem.PerformClick();
+                return;
+            }
+
+            switch(selector)
+            {
+                case Selector.SLColour:
+                    File.Delete(Environment.CurrentDirectory + "\\data\\SLColour.dat");
+                    File.WriteAllText(
+                        Environment.CurrentDirectory + "\\data\\SLColour.dat",
+                        "global GUI_PASSED_HWND = " + GlobalHwnd + ";\n" +
+                        "SetWindowByHWND(GUI_PASSED_HWND);\n" +
+                        "Scrape();\n" +
+                        "print(ShowColorPicker());\n" +
+                        "//<SCRIPT END>"
+                    );
+                    currentScriptFile = Environment.CurrentDirectory + "\\data\\SLColour.dat";
+                    break;
+
+                case Selector.SLBitmap:
+                    File.Delete(Environment.CurrentDirectory + "\\data\\SLBitmap.dat");
+                    File.WriteAllText(
+                        Environment.CurrentDirectory + "\\data\\SLBitmap.dat",
+                        "global GUI_PASSED_HWND = " + GlobalHwnd + ";\n" +
+                        "SetWindowByHWND(GUI_PASSED_HWND);\n" +
+                        "Scrape();\n" +
+                        "print(ShowBitmapPicker());\n" +
+                        "//<SCRIPT END>"
+                    );
+                    currentScriptFile = Environment.CurrentDirectory + "\\data\\SLBitmap.dat";
+                    break;
+
+                default:
+                    break;
+            }
+
+            SilentPipe = true;
+            (new Task(() => { StartSytheLibInstance(true); })).Start();
+        }
+
+
+
+        #endregion
+
         #region Main toolbar
+
+        private void lblHwnd_Click(object sender, EventArgs e)
+        {
+            if (GlobalHwnd == "N/A")
+            {
+                var result = MessageBox.Show("You haven't selected a global window handle to use with the current script. Would you like to set one now?", "Window Handle", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+                if (result != DialogResult.Yes) return;
+
+                // if yes...
+                windowHandleSelectorToolStripMenuItem.PerformClick();
+                return;
+            }
+            else
+            {
+                var result = MessageBox.Show("Would you like to reset the global window handle?", "Window Handle", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+                if (result != DialogResult.Yes) GlobalHwnd = "N/A";
+            }
+        }
 
         private async void btnRun_Click(object sender, EventArgs e)
         {
             if (ScriptTask != null && ScriptTask.Status == TaskStatus.Running) { KillSytheLib(); return; }
 
             currentScriptFile = DataDirectory + Guid.NewGuid().ToString() + ".txt";
-            File.WriteAllText(currentScriptFile, txtEditor.Text + "\n//<SCRIPT END>\n");
+            string fullscript = txtEditor.Text + "\n//<SCRIPT END>\n";
+
+            if (GlobalHwnd != "N/A") fullscript = "global GUI_PASSED_HWND = " + GlobalHwnd + ";\n" + fullscript;
+
+            File.WriteAllText(currentScriptFile, fullscript);
 
             txtInput.Focus();
 
             btnRun.Image = Properties.Resources.Stop_16px;
 
-            ScriptTask = new Task(() => { StartSytheLibInstance(); });
+            SilentPipe = false;
+
+            ScriptTask = new Task(() => { StartSytheLibInstance(false); });
             ScriptTask.Start();
 
             ChangeStatus("Running.", Color.Blue);
@@ -206,6 +298,10 @@ namespace SLaDE
 
         #region Form and Editor Events
 
+        private void frmMain_Load(object sender, EventArgs e)
+        {
+            CheckForUpdates();
+        }
         private void FrmMain_FormClosing(object sender, FormClosingEventArgs e)
         {
             foreach (string file in Directory.GetFiles(DataDirectory))
@@ -294,12 +390,14 @@ namespace SLaDE
         {
             if (string.IsNullOrEmpty(data)) return;
             if (string.IsNullOrWhiteSpace(data)) return;
-            log("SCRIPT: " + data);
+            //if (!data.StartsWith("Load") || !data.StartsWith("\"")) log("SCRIPT: " + data);
+            log(data);
             ConsoleAutoScroll();
         }
 
         private void Proc_ErrorDataReceived(object sender, DataReceivedEventArgs e)
         {
+            if (SilentPipe) return;
             ManageData(e.Data);
         }
 
@@ -360,9 +458,9 @@ namespace SLaDE
         #region Process Interactions
 
         // Starts an instance of SytheLibProt.exe and maps events and StartInfo properly
-        private void StartSytheLibInstance()
+        private void StartSytheLibInstance(bool silent)
         {
-            ChangeStatus("Spawning SytheLib process...", Color.Blue);
+            if (!silent) ChangeStatus("Spawning SytheLib process...", Color.Blue);
 
             proc = new Process();
             proc.StartInfo.FileName = SytheLibExecutable;
@@ -386,15 +484,15 @@ namespace SLaDE
 
                 if (start)
                 {
-                    ChangeStatus("Running...", Color.Blue);
+                    if (!silent) ChangeStatus("Running...", Color.Blue);
                     proc.BeginErrorReadLine();
                     proc.BeginOutputReadLine();
                     proc.WaitForExit();
                 }
                 else
                 {
-                    ChangeStatus("Error starting SytheLib. Check console.", Color.Red);
-                    log("SYSTEM: Error starting SytheLib.");
+                    if (!silent) ChangeStatus("Error starting SytheLib. Check console.", Color.Red);
+                    if (!silent) log("SYSTEM: Error starting SytheLib.");
                 }
             }
             catch (Exception ex)
@@ -420,6 +518,27 @@ namespace SLaDE
         #endregion
 
         #region Menu
+
+        private void colourSelectorToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            RunToolScript(Selector.SLColour);
+        }
+
+        private void bitmapSelectorToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            RunToolScript(Selector.SLBitmap);
+        }
+
+        private void windowHandleSelectorToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            frmHandleSelector handleSelector = new frmHandleSelector(GlobalHwnd);
+            handleSelector.ShowDialog();
+
+            if (handleSelector.DialogResult != DialogResult.OK) return;
+            GlobalHwnd = handleSelector.GlobalHwnd;
+
+            lblHwnd.Text = "Global Window Handle: " + handleSelector.GlobalHwnd;
+        }
 
         private void checkScriptTaskStatusToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -491,7 +610,23 @@ namespace SLaDE
             }
         }
 
+
         #endregion
+
+        #region Updates
+
+        public void CheckForUpdates()
+        {
+
+            string updatefile = (new System.Net.WebClient()).DownloadString("http://www.dangk.net/files/updateserver/slade.txt");
+            if (updatefile != CurrentVersion)
+            {
+                MessageBox.Show("There is a new version of SLaDE available for download. The update server isn't ready yet, so please check the Sythe thread for details.");
+            }
+        }
+
+        #endregion
+
 
     }
 }
