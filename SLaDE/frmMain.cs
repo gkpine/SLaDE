@@ -17,6 +17,7 @@ namespace SLaDE
 
     // Ideas: snippet repository
     // Documentation
+    // Colour picker: https://stackoverflow.com/questions/1483928/how-to-read-the-color-of-a-screen-pixel
 
     public partial class frmMain : Form
     {
@@ -606,7 +607,7 @@ namespace SLaDE
                     counter++;
                 }
 
-                File.WriteAllText(BackupDir + filename + ".txt", txtEditor.Text);
+                File.WriteAllText(BackupDir + filename.Replace(":", ";") + ".txt", txtEditor.Text);
             }
         }
 
