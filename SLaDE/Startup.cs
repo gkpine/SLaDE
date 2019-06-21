@@ -37,16 +37,6 @@ namespace SLaDE
             if (!Directory.Exists(datadir)) Directory.CreateDirectory(datadir);         
         }
 
-        public static bool CheckSyntaxFile(string syntaxfile)
-        {
-            if (!File.Exists(syntaxfile))
-            {
-                MessageBox.Show("The syntax highlighting file (expected: \"" + syntaxfile + "\") was not found. Syntax highlighting will not work until this file is replaced.", "syntax.xml", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return false;
-            }
-            return true;
-        }
-
         public static bool CheckSLExecutable(string SLpath)
         {
             if (!File.Exists(SLpath))

@@ -70,5 +70,29 @@ namespace SLaDE.Properties {
                 this["BackupMins"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool UseOldSelector {
+            get {
+                return ((bool)(this["UseOldSelector"]));
+            }
+            set {
+                this["UseOldSelector"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool UseSyntaxHighlighting {
+            get {
+                return ((bool)(this["UseSyntaxHighlighting"]));
+            }
+            set {
+                this["UseSyntaxHighlighting"] = value;
+            }
+        }
     }
 }

@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+
 namespace SLaDE
 {
     public partial class frmHandleSelector : Form
@@ -20,6 +21,8 @@ namespace SLaDE
 
         private Process[] CurrentProcesses = null;
         public string GlobalHwnd = "N/A";
+
+        private List<IntPtr> handles = new List<IntPtr>();
 
         public frmHandleSelector(string currentHandle)
         {
@@ -36,6 +39,7 @@ namespace SLaDE
 
         private void GetWindowHandles()
         {
+            handles.Clear();
             lstWindowTitles.Items.Clear();
 
             CurrentProcesses = Process.GetProcesses();
@@ -43,6 +47,8 @@ namespace SLaDE
             {
                 if (!string.IsNullOrEmpty(proc.MainWindowTitle))
                     lstWindowTitles.Items.Add("[" + proc.MainWindowHandle.ToString() + "]" + proc.MainWindowTitle);
+
+                handles.Add(proc.MainWindowHandle);
             }
         }
 
@@ -58,7 +64,19 @@ namespace SLaDE
 
         private void lstWindowTitles_SelectedIndexChanged(object sender, EventArgs e)
         {
-            txtSelectedHandle.Text = lstWindowTitles.SelectedItem.ToString().Substring(1, lstWindowTitles.SelectedItem.ToString().IndexOf(']') - 1);
+            string selectedHandle = lstWindowTitles.SelectedItem.ToString().Substring(1, lstWindowTitles.SelectedItem.ToString().IndexOf(']') - 1);
+            txtSelectedHandle.Text = selectedHandle;
+
+            // Selected process info
+            string windowTitle = lstWindowTitles.SelectedItem.ToString().Substring(lstWindowTitles.SelectedItem.ToString().IndexOf(']') + 1);
+            IntPtr windowHandle = FindWindow(null, windowTitle);
+
+            WindowHandleInfo whi = new WindowHandleInfo(handles[lstWindowTitles.SelectedIndex]);
+            foreach (IntPtr c in whi.GetAllChildHandles())
+            {
+                Console.WriteLine("Title: " + WindowInfo.GetText(c) + " ;; Classname: " + WindowInfo.GetClassNameCS(c));
+            }
+
         }
 
         private void btnCopy_Click(object sender, EventArgs e)
@@ -91,6 +109,117 @@ namespace SLaDE
         private void btnBlank_Click(object sender, EventArgs e)
         {
             txtSelectedHandle.Text = "N/A";
+        }
+
+    }
+
+    public static class WindowInfo
+    {
+        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        static extern int GetClassName(IntPtr hWnd, StringBuilder lpClassName, int nMaxCount);
+
+        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        static extern int GetWindowTextLength(IntPtr hWnd);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
+
+        [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto)]
+        public static extern IntPtr GetParent(IntPtr hWnd);
+
+        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+        static extern IntPtr FindWindowEx(IntPtr parentHandle, IntPtr childAfter, string lclassName, string windowTitle);
+
+        public static string GetText(IntPtr hWnd)
+        {
+            // Allocate correct string length first
+            int length = GetWindowTextLength(hWnd);
+            StringBuilder sb = new StringBuilder(length + 1);
+            GetWindowText(hWnd, sb, sb.Capacity);
+            return sb.ToString();
+        }
+
+        public static string GetClassNameCS(IntPtr hwnd)
+        {
+            StringBuilder sb = new StringBuilder(512);
+            GetClassName(hwnd, sb, sb.Capacity);
+
+            return sb.ToString();
+        }
+
+        public static IntPtr GetParentHwnd(IntPtr ChildHwnd)
+        {
+            return GetParent(ChildHwnd);
+        }
+
+        public static IntPtr FindWindowByIndex(IntPtr hWndParent, int index)
+        {
+            if (index == 0)
+                return hWndParent;
+            else
+            {
+                int ct = 0;
+                IntPtr result = IntPtr.Zero;
+                do
+                {
+                    result = FindWindowEx(hWndParent, result, "Button", null);
+                    if (result != IntPtr.Zero)
+                        ++ct;
+                }
+                while (ct < index && result != IntPtr.Zero);
+                return result;
+            }
+        }
+    }
+
+    public class WindowHandleInfo
+    {
+        private delegate bool EnumWindowProc(IntPtr hwnd, IntPtr lParam);
+
+        [DllImport("user32")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool EnumChildWindows(IntPtr window, EnumWindowProc callback, IntPtr lParam);
+
+        private IntPtr _MainHandle;
+
+        public WindowHandleInfo(IntPtr handle)
+        {
+            this._MainHandle = handle;
+        }
+
+        public List<IntPtr> GetAllChildHandles()
+        {
+            List<IntPtr> childHandles = new List<IntPtr>();
+
+            GCHandle gcChildhandlesList = GCHandle.Alloc(childHandles);
+            IntPtr pointerChildHandlesList = GCHandle.ToIntPtr(gcChildhandlesList);
+
+            try
+            {
+                EnumWindowProc childProc = new EnumWindowProc(EnumWindow);
+                EnumChildWindows(this._MainHandle, childProc, pointerChildHandlesList);
+            }
+            finally
+            {
+                gcChildhandlesList.Free();
+            }
+
+            return childHandles;
+        }
+
+        private bool EnumWindow(IntPtr hWnd, IntPtr lParam)
+        {
+            GCHandle gcChildhandlesList = GCHandle.FromIntPtr(lParam);
+
+            if (gcChildhandlesList == null || gcChildhandlesList.Target == null)
+            {
+                return false;
+            }
+
+            List<IntPtr> childHandles = gcChildhandlesList.Target as List<IntPtr>;
+            childHandles.Add(hWnd);
+
+            return true;
         }
     }
 }

@@ -12,10 +12,14 @@ namespace SLaDE
 {
     public partial class frmSettings : Form
     {
-        public frmSettings()
+        frmMain parent;
+
+        public frmSettings(frmMain parent)
         {
             InitializeComponent();
             this.FormClosing += FrmSettings_FormClosing;
+
+            this.parent = parent;
         }
 
         private void FrmSettings_FormClosing(object sender, FormClosingEventArgs e)
@@ -40,6 +44,8 @@ namespace SLaDE
         {
             chkCoords.Checked = Properties.Settings.Default.MouseCoordinates;
             chkBackups.Checked = Properties.Settings.Default.Backups;
+            chkUseOldSelector.Checked = Properties.Settings.Default.UseOldSelector;
+            chkSyntaxHighlight.Checked = Properties.Settings.Default.UseSyntaxHighlighting;
 
             txtMinutes.Text = Properties.Settings.Default.BackupMins.ToString();
             txtMinutes.Enabled = chkBackups.Checked;
@@ -65,6 +71,20 @@ namespace SLaDE
         private void lnkOpenFolder_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             System.Diagnostics.Process.Start(Environment.CurrentDirectory + "\\backups\\");
+        }
+
+        private void chkUseOldSelector_CheckedChanged(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.UseOldSelector = chkUseOldSelector.Checked;
+            Properties.Settings.Default.Save();
+        }
+
+        private void chkSyntaxHighlight_CheckedChanged(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.UseSyntaxHighlighting = chkSyntaxHighlight.Checked;
+            Properties.Settings.Default.Save();
+
+            parent.OnSettingsChanged();
         }
     }
 }

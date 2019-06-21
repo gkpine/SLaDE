@@ -40,6 +40,8 @@
             this.btnNew = new System.Windows.Forms.ToolStripButton();
             this.btnSave = new System.Windows.Forms.ToolStripButton();
             this.btnOpen = new System.Windows.Forms.ToolStripButton();
+            this.btnFind = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
             this.btnClips = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.btnRun = new System.Windows.Forms.ToolStripButton();
@@ -63,14 +65,14 @@
             this.checkScriptTaskStatusToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripSeparator();
             this.windowHandleSelectorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.bitmapSelectorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.colourSelectorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.bitmapSelectorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.licensingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.freeIconsByIcons8ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.txtEditor = new FastColoredTextBoxNS.FastColoredTextBox();
             this.ssData = new System.Windows.Forms.StatusStrip();
             this.lblCoordinates = new System.Windows.Forms.ToolStripStatusLabel();
-            this.tmrMouse = new System.Windows.Forms.Timer(this.components);
+            this.tmrBackgroundMonitor = new System.Windows.Forms.Timer(this.components);
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.tmrBackup = new System.Windows.Forms.Timer(this.components);
             this.tsControls.SuspendLayout();
@@ -130,6 +132,8 @@
             this.btnNew,
             this.btnSave,
             this.btnOpen,
+            this.btnFind,
+            this.toolStripSeparator6,
             this.btnClips,
             this.toolStripSeparator2,
             this.btnRun,
@@ -199,6 +203,22 @@
             this.btnOpen.Text = "Open";
             this.btnOpen.ToolTipText = "Open Script";
             this.btnOpen.Click += new System.EventHandler(this.btnOpen_Click);
+            // 
+            // btnFind
+            // 
+            this.btnFind.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.btnFind.Image = ((System.Drawing.Image)(resources.GetObject("btnFind.Image")));
+            this.btnFind.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnFind.Name = "btnFind";
+            this.btnFind.Size = new System.Drawing.Size(23, 33);
+            this.btnFind.Text = "Find (Ctrl+F)";
+            this.btnFind.ToolTipText = "Find (Ctrl+F)";
+            this.btnFind.Click += new System.EventHandler(this.btnFind_Click);
+            // 
+            // toolStripSeparator6
+            // 
+            this.toolStripSeparator6.Name = "toolStripSeparator6";
+            this.toolStripSeparator6.Size = new System.Drawing.Size(6, 36);
             // 
             // btnClips
             // 
@@ -389,19 +409,19 @@
             this.windowHandleSelectorToolStripMenuItem.Text = "Window Handle Selector";
             this.windowHandleSelectorToolStripMenuItem.Click += new System.EventHandler(this.windowHandleSelectorToolStripMenuItem_Click);
             // 
-            // bitmapSelectorToolStripMenuItem
-            // 
-            this.bitmapSelectorToolStripMenuItem.Name = "bitmapSelectorToolStripMenuItem";
-            this.bitmapSelectorToolStripMenuItem.Size = new System.Drawing.Size(225, 22);
-            this.bitmapSelectorToolStripMenuItem.Text = "Bitmap Selector";
-            this.bitmapSelectorToolStripMenuItem.Click += new System.EventHandler(this.bitmapSelectorToolStripMenuItem_Click);
-            // 
             // colourSelectorToolStripMenuItem
             // 
             this.colourSelectorToolStripMenuItem.Name = "colourSelectorToolStripMenuItem";
             this.colourSelectorToolStripMenuItem.Size = new System.Drawing.Size(225, 22);
             this.colourSelectorToolStripMenuItem.Text = "Colour Selector";
             this.colourSelectorToolStripMenuItem.Click += new System.EventHandler(this.colourSelectorToolStripMenuItem_Click);
+            // 
+            // bitmapSelectorToolStripMenuItem
+            // 
+            this.bitmapSelectorToolStripMenuItem.Name = "bitmapSelectorToolStripMenuItem";
+            this.bitmapSelectorToolStripMenuItem.Size = new System.Drawing.Size(225, 22);
+            this.bitmapSelectorToolStripMenuItem.Text = "Bitmap Selector";
+            this.bitmapSelectorToolStripMenuItem.Click += new System.EventHandler(this.bitmapSelectorToolStripMenuItem_Click);
             // 
             // licensingToolStripMenuItem
             // 
@@ -470,11 +490,11 @@
             this.lblCoordinates.Size = new System.Drawing.Size(61, 17);
             this.lblCoordinates.Text = "0000, 0000";
             // 
-            // tmrMouse
+            // tmrBackgroundMonitor
             // 
-            this.tmrMouse.Enabled = true;
-            this.tmrMouse.Interval = 15;
-            this.tmrMouse.Tick += new System.EventHandler(this.tmrMouseCoords_Tick);
+            this.tmrBackgroundMonitor.Enabled = true;
+            this.tmrBackgroundMonitor.Interval = 15;
+            this.tmrBackgroundMonitor.Tick += new System.EventHandler(this.tmrBackgroundMonitor_Tick);
             // 
             // splitContainer1
             // 
@@ -508,6 +528,7 @@
             this.Controls.Add(this.msMenu);
             this.Controls.Add(this.ssData);
             this.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.msMenu;
             this.Name = "frmMain";
             this.Text = "SLaDE";
@@ -560,7 +581,7 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
         private System.Windows.Forms.StatusStrip ssData;
         private System.Windows.Forms.ToolStripStatusLabel lblCoordinates;
-        private System.Windows.Forms.Timer tmrMouse;
+        private System.Windows.Forms.Timer tmrBackgroundMonitor;
         private System.Windows.Forms.ToolStripMenuItem settingsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem newToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem saveToolStripMenuItem;
@@ -576,6 +597,8 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
         private System.Windows.Forms.ToolStripMenuItem bitmapSelectorToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem colourSelectorToolStripMenuItem;
+        private System.Windows.Forms.ToolStripButton btnFind;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
     }
 }
 

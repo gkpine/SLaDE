@@ -10,19 +10,21 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.IO;
+using WinSiphon;
 using System.Threading;
+using FastColoredTextBoxNS;
+using System.Text.RegularExpressions;
 
 namespace SLaDE
 {
 
-    // Ideas: snippet repository
     // Documentation
     // Colour picker: https://stackoverflow.com/questions/1483928/how-to-read-the-color-of-a-screen-pixel
 
     public partial class frmMain : Form
     {
-        public const string CurrentVersion = "alpha";
-
+        public const string CurrentVersion = "alpha2.02";
+        public const string UpdateURL = "https://www.sythe.org/threads/slade-alpha-release-testing-but-kinda-sorta-stable/";
 
         // We run into access issues if the GlobalHwnd is IntPtr,
         // and since we only ever use it as a string it will be 
@@ -31,7 +33,6 @@ namespace SLaDE
 
         private string SytheLibExecutable;
         private string DataDirectory;
-        private string SyntaxFile;
         private string TessdataDirectory;
         private string BackupDir;
 
@@ -49,6 +50,15 @@ namespace SLaDE
         // based tools
         private bool SilentPipe = false;
 
+        TextStyle DarkBlueStyle = new TextStyle(Brushes.DarkBlue, null, FontStyle.Regular);
+        TextStyle BlueStyle = new TextStyle(Brushes.Blue, null, FontStyle.Regular);
+        TextStyle GrayStyle = new TextStyle(Brushes.Gray, null, FontStyle.Regular);
+        TextStyle MagentaStyle = new TextStyle(Brushes.Magenta, null, FontStyle.Regular);
+        TextStyle GreenStyle = new TextStyle(Brushes.Green, null, FontStyle.Regular);
+        TextStyle BrownStyle = new TextStyle(Brushes.Brown, null, FontStyle.Regular);
+        TextStyle MaroonStyle = new TextStyle(Brushes.Maroon, null, FontStyle.Regular);
+        MarkerStyle SameWordsStyle = new MarkerStyle(new SolidBrush(Color.FromArgb(40, Color.Gray)));
+
         private enum Selector
         {
             SLBitmap, SLColour, BluBitmap, BluColour
@@ -61,7 +71,6 @@ namespace SLaDE
             DataDirectory = Environment.CurrentDirectory + "\\data\\";
             SytheLibExecutable = "SytheLibProt.exe";
             currentScriptFile = "";
-            SyntaxFile = DataDirectory + "syntax.xml";
             TessdataDirectory = Environment.CurrentDirectory + "\\tessdata\\";
             BackupDir = Environment.CurrentDirectory + "\\backups\\";
         }
@@ -69,7 +78,6 @@ namespace SLaDE
         private void CheckFilesAndFolders()
         {
             Startup.CheckDataDir(DataDirectory);
-            Startup.CheckSyntaxFile(SyntaxFile);
             Startup.CheckBackupDir(BackupDir);
 
             // both of the following conditions have to be true for the run button to be enabled
@@ -98,13 +106,10 @@ namespace SLaDE
 
             txtOutput.DeselectAll();
 
+            txtEditor.Language = FastColoredTextBoxNS.Language.Custom;
+
             ApplySettings();
-
         }
-
-
-
-
 
         #endregion
 
@@ -120,7 +125,7 @@ namespace SLaDE
                 return;
             }
 
-            switch(selector)
+            switch (selector)
             {
                 case Selector.SLColour:
                     File.Delete(Environment.CurrentDirectory + "\\data\\SLColour.dat");
@@ -161,6 +166,11 @@ namespace SLaDE
         #endregion
 
         #region Main toolbar
+
+        private void btnFind_Click(object sender, EventArgs e)
+        {
+            txtEditor.ShowFindDialog();
+        }
 
         private void lblHwnd_Click(object sender, EventArgs e)
         {
@@ -277,19 +287,19 @@ namespace SLaDE
 
         private void btnSettings_Click(object sender, EventArgs e)
         {
-            SettingsFormDialog();
+            SettingsFormDialog(this);
         }
 
         private void ApplySettings()
         {
             tmrBackup.Enabled = Properties.Settings.Default.Backups;
             tmrBackup.Interval = Properties.Settings.Default.BackupMins * 60000;
-            tmrMouse.Enabled = Properties.Settings.Default.MouseCoordinates;
+            tmrBackgroundMonitor.Enabled = Properties.Settings.Default.MouseCoordinates;
         }
 
-        private void SettingsFormDialog()
+        private void SettingsFormDialog(frmMain parent)
         {
-            frmSettings frm = new frmSettings();
+            frmSettings frm = new frmSettings(parent);
             var result = frm.ShowDialog();
 
             if (result == DialogResult.OK) ApplySettings();
@@ -307,7 +317,7 @@ namespace SLaDE
         {
             foreach (string file in Directory.GetFiles(DataDirectory))
                 if (file.EndsWith(".txt")) File.Delete(file);
-            
+
 
             if (isDirty)
             {
@@ -325,6 +335,39 @@ namespace SLaDE
         {
             if (txtEditor.Text == "") isDirty = false;
             else isDirty = true;
+            
+            if (Properties.Settings.Default.UseSyntaxHighlighting)
+            {
+                txtEditor.LeftBracket = '(';
+                txtEditor.RightBracket = ')';
+                txtEditor.LeftBracket2 = '\x0';
+                txtEditor.RightBracket2 = '\x0';
+                //clear style of changed range
+                e.ChangedRange.ClearStyle(BlueStyle, GrayStyle, MagentaStyle, GreenStyle, BrownStyle);
+
+                //string highlighting
+                e.ChangedRange.SetStyle(BrownStyle, @"""""|@""""|''|@"".*?""|(?<!@)(?<range>"".*?[^\\]"")|'.*?[^\\]'");
+                //comment highlighting
+                e.ChangedRange.SetStyle(GreenStyle, @"//.*$", RegexOptions.Multiline);
+                e.ChangedRange.SetStyle(GreenStyle, @"(/\*.*?\*/)|(/\*.*)", RegexOptions.Singleline);
+                e.ChangedRange.SetStyle(GreenStyle, @"(/\*.*?\*/)|(.*\*/)", RegexOptions.Singleline | RegexOptions.RightToLeft);
+                //number highlighting
+                e.ChangedRange.SetStyle(MagentaStyle, @"\b\d+[\.]?\d*([eE]\-?\d+)?[lLdDfF]?\b|\b0x[a-fA-F\d]+\b");
+                //attribute highlighting
+                e.ChangedRange.SetStyle(GrayStyle, @"^\s*(?<range>\[.+?\])\s*$", RegexOptions.Multiline);
+                //class name highlighting
+                e.ChangedRange.SetStyle(DarkBlueStyle, @"\b(class|struct|enum|interface)\s+(?<range>\w+?)\b");
+                //keyword highlighting
+                e.ChangedRange.SetStyle(BlueStyle, @"\b(auto|abstract|def|as|base|bool|break|byte|case|catch|char|checked|class|const|continue|decimal|default|delegate|do|double|else|enum|event|explicit|extern|false|finally|fixed|float|for|foreach|goto|if|implicit|in|int|interface|internal|is|lock|long|namespace|new|null|object|operator|out|override|params|private|protected|public|readonly|ref|return|sbyte|sealed|short|sizeof|stackalloc|static|string|struct|switch|this|throw|true|try|typeof|uint|ulong|unchecked|unsafe|ushort|using|virtual|void|volatile|while|add|alias|ascending|descending|dynamic|from|get|global|group|into|join|let|orderby|partial|remove|select|set|value|var|where|yield)\b|#region\b|#endregion\b");
+
+                //clear folding markers
+                e.ChangedRange.ClearFoldingMarkers();
+
+                //set folding markers
+                e.ChangedRange.SetFoldingMarkers("{", "}");//allow to collapse brackets block
+                e.ChangedRange.SetFoldingMarkers(@"#region\b", @"#endregion\b");//allow to collapse #region blocks
+                e.ChangedRange.SetFoldingMarkers(@"/\*", @"\*/");//allow to collapse comment block
+            }
         }
 
         #endregion
@@ -370,7 +413,7 @@ namespace SLaDE
         {
             if (txtOutput.InvokeRequired)
             {
-                txtOutput.Invoke(new MethodInvoker(() => 
+                txtOutput.Invoke(new MethodInvoker(() =>
                 {
                     txtOutput.SelectionStart = txtOutput.Text.Length - 1;
                     txtOutput.ScrollToCaret();
@@ -402,7 +445,7 @@ namespace SLaDE
             ManageData(e.Data);
         }
 
-        private  void Proc_OutputDataReceived(object sender, DataReceivedEventArgs e)
+        private void Proc_OutputDataReceived(object sender, DataReceivedEventArgs e)
         {
             ManageData(e.Data);
         }
@@ -532,13 +575,24 @@ namespace SLaDE
 
         private void windowHandleSelectorToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            frmHandleSelector handleSelector = new frmHandleSelector(GlobalHwnd);
-            handleSelector.ShowDialog();
+            bool useOldSelector = Properties.Settings.Default.UseOldSelector;
 
-            if (handleSelector.DialogResult != DialogResult.OK) return;
-            GlobalHwnd = handleSelector.GlobalHwnd;
+            if (useOldSelector)
+            {
+                frmHandleSelector handleSelector = new frmHandleSelector(GlobalHwnd);
+                handleSelector.ShowDialog();
+                if (handleSelector.DialogResult != DialogResult.OK) return;
+                GlobalHwnd = handleSelector.GlobalHwnd;
+            }
+            else
+            {
+                frmWinSiphon handleSelector = new frmWinSiphon(true);
+                handleSelector.ShowDialog();
+                if (handleSelector.DialogResult != DialogResult.OK) return;
+                GlobalHwnd = handleSelector.GlobalHwnd;
+            }
 
-            lblHwnd.Text = "Global Window Handle: " + handleSelector.GlobalHwnd;
+            lblHwnd.Text = "Global Window Handle: " + GlobalHwnd;
         }
 
         private void checkScriptTaskStatusToolStripMenuItem_Click(object sender, EventArgs e)
@@ -556,7 +610,7 @@ namespace SLaDE
 
         private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            SettingsFormDialog();
+            SettingsFormDialog(this);
         }
 
         private void newToolStripMenuItem_Click(object sender, EventArgs e)
@@ -583,7 +637,7 @@ namespace SLaDE
 
         #region Status strip
 
-        private void tmrMouseCoords_Tick(object sender, EventArgs e)
+        private void tmrBackgroundMonitor_Tick(object sender, EventArgs e)
         {
             if (Properties.Settings.Default.MouseCoordinates) lblCoordinates.Text = Cursor.Position.ToString();
         }
@@ -618,16 +672,42 @@ namespace SLaDE
 
         public void CheckForUpdates()
         {
-
             string updatefile = (new System.Net.WebClient()).DownloadString("http://www.dangk.net/files/updateserver/slade.txt");
+
+            string updateMessage =
+                string.Format("SLaDE has been updated. The newest version is version {0}. Your current version is {1}. Click yes to visit the Sythe.org thread for the new version.", updatefile, CurrentVersion);
+
+
             if (updatefile != CurrentVersion)
             {
-                MessageBox.Show("There is a new version of SLaDE available for download. The update server isn't ready yet, so please check the Sythe thread for details.");
+                var result = MessageBox.Show(updateMessage, "Update", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+                if (result != DialogResult.Yes) return;
+
+                Process.Start(UpdateURL);
+            }
+        }
+
+
+        #endregion
+
+        #region Settings Interaction
+
+        public void OnSettingsChanged()
+        {
+            if (!Properties.Settings.Default.UseSyntaxHighlighting)
+            {
+                txtEditor.Language = Language.Custom;
+                txtEditor.ClearStylesBuffer();
+                txtEditor.ClearStyle(StyleIndex.All);
+
+                txtEditor.OnTextChanged();
+            }
+            else
+            {
+                txtEditor.OnTextChanged();
             }
         }
 
         #endregion
-
-
     }
 }
