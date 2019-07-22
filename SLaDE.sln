@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SLaDE", "SLaDE\SLaDE.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinSiphon", "WinSiphon\WinSiphon.csproj", "{59D18CD6-10D7-41DD-9F8A-AFD6F717759E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SLaDEConsole", "SLaDEConsole\SLaDEConsole.csproj", "{10AB20CC-EE34-44F6-A691-594D9A727349}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,8 +23,15 @@ Global
 		{59D18CD6-10D7-41DD-9F8A-AFD6F717759E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{59D18CD6-10D7-41DD-9F8A-AFD6F717759E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{59D18CD6-10D7-41DD-9F8A-AFD6F717759E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{10AB20CC-EE34-44F6-A691-594D9A727349}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{10AB20CC-EE34-44F6-A691-594D9A727349}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{10AB20CC-EE34-44F6-A691-594D9A727349}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{10AB20CC-EE34-44F6-A691-594D9A727349}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {83A54115-FBDE-436D-8E23-79A957B213A3}
 	EndGlobalSection
 EndGlobal

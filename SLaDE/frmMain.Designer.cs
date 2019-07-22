@@ -30,9 +30,6 @@
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmMain));
-            this.txtOutput = new System.Windows.Forms.TextBox();
-            this.txtInput = new System.Windows.Forms.TextBox();
-            this.btnInput = new System.Windows.Forms.Button();
             this.tsControls = new System.Windows.Forms.ToolStrip();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.btnSettings = new System.Windows.Forms.ToolStripButton();
@@ -49,9 +46,6 @@
             this.lblHwnd = new System.Windows.Forms.ToolStripLabel();
             this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.lblStatus = new System.Windows.Forms.ToolStripLabel();
-            this.panConsoleArea = new System.Windows.Forms.Panel();
-            this.panInput = new System.Windows.Forms.Panel();
-            this.lnkClearConsole = new System.Windows.Forms.LinkLabel();
             this.msMenu = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -69,57 +63,27 @@
             this.bitmapSelectorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.licensingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.freeIconsByIcons8ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.txtEditor = new FastColoredTextBoxNS.FastColoredTextBox();
             this.ssData = new System.Windows.Forms.StatusStrip();
             this.lblCoordinates = new System.Windows.Forms.ToolStripStatusLabel();
             this.tmrBackgroundMonitor = new System.Windows.Forms.Timer(this.components);
-            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.tmrBackup = new System.Windows.Forms.Timer(this.components);
+            this.txtEditor = new FastColoredTextBoxNS.FastColoredTextBox();
+            this.mainContainer = new System.Windows.Forms.SplitContainer();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.btnClear = new System.Windows.Forms.Button();
+            this.toolStripSeparator7 = new System.Windows.Forms.ToolStripSeparator();
+            this.btnConsoleVisible = new System.Windows.Forms.ToolStripButton();
+            this.debugConsole = new SLaDE.SladeConsole();
             this.tsControls.SuspendLayout();
-            this.panConsoleArea.SuspendLayout();
-            this.panInput.SuspendLayout();
             this.msMenu.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.txtEditor)).BeginInit();
             this.ssData.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
-            this.splitContainer1.Panel1.SuspendLayout();
-            this.splitContainer1.Panel2.SuspendLayout();
-            this.splitContainer1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.txtEditor)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.mainContainer)).BeginInit();
+            this.mainContainer.Panel1.SuspendLayout();
+            this.mainContainer.Panel2.SuspendLayout();
+            this.mainContainer.SuspendLayout();
+            this.panel1.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // txtOutput
-            // 
-            this.txtOutput.BackColor = System.Drawing.Color.DimGray;
-            this.txtOutput.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.txtOutput.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtOutput.ForeColor = System.Drawing.Color.WhiteSmoke;
-            this.txtOutput.Location = new System.Drawing.Point(0, 0);
-            this.txtOutput.Multiline = true;
-            this.txtOutput.Name = "txtOutput";
-            this.txtOutput.ReadOnly = true;
-            this.txtOutput.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.txtOutput.Size = new System.Drawing.Size(775, 166);
-            this.txtOutput.TabIndex = 14;
-            // 
-            // txtInput
-            // 
-            this.txtInput.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtInput.Location = new System.Drawing.Point(87, 2);
-            this.txtInput.Name = "txtInput";
-            this.txtInput.Size = new System.Drawing.Size(610, 22);
-            this.txtInput.TabIndex = 7;
-            // 
-            // btnInput
-            // 
-            this.btnInput.Dock = System.Windows.Forms.DockStyle.Right;
-            this.btnInput.Location = new System.Drawing.Point(700, 0);
-            this.btnInput.Name = "btnInput";
-            this.btnInput.Size = new System.Drawing.Size(75, 27);
-            this.btnInput.TabIndex = 8;
-            this.btnInput.Text = "Input";
-            this.btnInput.UseVisualStyleBackColor = true;
-            this.btnInput.Click += new System.EventHandler(this.btnInput_Click);
             // 
             // tsControls
             // 
@@ -140,6 +104,8 @@
             this.toolStripSeparator3,
             this.lblHwnd,
             this.toolStripSeparator5,
+            this.btnConsoleVisible,
+            this.toolStripSeparator7,
             this.lblStatus});
             this.tsControls.Location = new System.Drawing.Point(0, 24);
             this.tsControls.Name = "tsControls";
@@ -269,38 +235,6 @@
             this.lblStatus.Size = new System.Drawing.Size(64, 33);
             this.lblStatus.Text = "Status: Idle";
             this.lblStatus.ToolTipText = "Current Status";
-            // 
-            // panConsoleArea
-            // 
-            this.panConsoleArea.Controls.Add(this.txtOutput);
-            this.panConsoleArea.Controls.Add(this.panInput);
-            this.panConsoleArea.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panConsoleArea.Location = new System.Drawing.Point(0, 0);
-            this.panConsoleArea.Name = "panConsoleArea";
-            this.panConsoleArea.Size = new System.Drawing.Size(775, 193);
-            this.panConsoleArea.TabIndex = 11;
-            // 
-            // panInput
-            // 
-            this.panInput.Controls.Add(this.lnkClearConsole);
-            this.panInput.Controls.Add(this.txtInput);
-            this.panInput.Controls.Add(this.btnInput);
-            this.panInput.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panInput.Location = new System.Drawing.Point(0, 166);
-            this.panInput.Name = "panInput";
-            this.panInput.Size = new System.Drawing.Size(775, 27);
-            this.panInput.TabIndex = 2;
-            // 
-            // lnkClearConsole
-            // 
-            this.lnkClearConsole.AutoSize = true;
-            this.lnkClearConsole.Location = new System.Drawing.Point(3, 5);
-            this.lnkClearConsole.Name = "lnkClearConsole";
-            this.lnkClearConsole.Size = new System.Drawing.Size(78, 13);
-            this.lnkClearConsole.TabIndex = 9;
-            this.lnkClearConsole.TabStop = true;
-            this.lnkClearConsole.Text = "Clear Console";
-            this.lnkClearConsole.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkClearConsole_LinkClicked);
             // 
             // msMenu
             // 
@@ -438,6 +372,32 @@
             this.freeIconsByIcons8ToolStripMenuItem.Text = "Free Icons by Icons8";
             this.freeIconsByIcons8ToolStripMenuItem.Click += new System.EventHandler(this.freeIconsByIcons8ToolStripMenuItem_Click);
             // 
+            // ssData
+            // 
+            this.ssData.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.lblCoordinates});
+            this.ssData.Location = new System.Drawing.Point(0, 508);
+            this.ssData.Name = "ssData";
+            this.ssData.Size = new System.Drawing.Size(775, 22);
+            this.ssData.TabIndex = 10;
+            this.ssData.Text = "statusStrip1";
+            // 
+            // lblCoordinates
+            // 
+            this.lblCoordinates.Name = "lblCoordinates";
+            this.lblCoordinates.Size = new System.Drawing.Size(61, 17);
+            this.lblCoordinates.Text = "0000, 0000";
+            // 
+            // tmrBackgroundMonitor
+            // 
+            this.tmrBackgroundMonitor.Enabled = true;
+            this.tmrBackgroundMonitor.Interval = 15;
+            this.tmrBackgroundMonitor.Tick += new System.EventHandler(this.tmrBackgroundMonitor_Tick);
+            // 
+            // tmrBackup
+            // 
+            this.tmrBackup.Tick += new System.EventHandler(this.tmrBackup_Tick);
+            // 
             // txtEditor
             // 
             this.txtEditor.AutoCompleteBrackets = true;
@@ -470,60 +430,88 @@
             this.txtEditor.SelectionColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(255)))));
             this.txtEditor.ServiceColors = ((FastColoredTextBoxNS.ServiceColors)(resources.GetObject("txtEditor.ServiceColors")));
             this.txtEditor.ShowFoldingLines = true;
-            this.txtEditor.Size = new System.Drawing.Size(775, 251);
-            this.txtEditor.TabIndex = 0;
+            this.txtEditor.Size = new System.Drawing.Size(775, 245);
+            this.txtEditor.TabIndex = 14;
             this.txtEditor.Zoom = 100;
             // 
-            // ssData
+            // mainContainer
             // 
-            this.ssData.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.lblCoordinates});
-            this.ssData.Location = new System.Drawing.Point(0, 508);
-            this.ssData.Name = "ssData";
-            this.ssData.Size = new System.Drawing.Size(775, 22);
-            this.ssData.TabIndex = 10;
-            this.ssData.Text = "statusStrip1";
+            this.mainContainer.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.mainContainer.Location = new System.Drawing.Point(0, 60);
+            this.mainContainer.Name = "mainContainer";
+            this.mainContainer.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
-            // lblCoordinates
+            // mainContainer.Panel1
             // 
-            this.lblCoordinates.Name = "lblCoordinates";
-            this.lblCoordinates.Size = new System.Drawing.Size(61, 17);
-            this.lblCoordinates.Text = "0000, 0000";
+            this.mainContainer.Panel1.Controls.Add(this.txtEditor);
             // 
-            // tmrBackgroundMonitor
+            // mainContainer.Panel2
             // 
-            this.tmrBackgroundMonitor.Enabled = true;
-            this.tmrBackgroundMonitor.Interval = 15;
-            this.tmrBackgroundMonitor.Tick += new System.EventHandler(this.tmrBackgroundMonitor_Tick);
+            this.mainContainer.Panel2.Controls.Add(this.debugConsole);
+            this.mainContainer.Panel2.Controls.Add(this.panel1);
+            this.mainContainer.Size = new System.Drawing.Size(775, 448);
+            this.mainContainer.SplitterDistance = 245;
+            this.mainContainer.TabIndex = 17;
             // 
-            // splitContainer1
+            // panel1
             // 
-            this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer1.Location = new System.Drawing.Point(0, 60);
-            this.splitContainer1.Name = "splitContainer1";
-            this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            this.panel1.BackColor = System.Drawing.Color.Gainsboro;
+            this.panel1.Controls.Add(this.btnClear);
+            this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
+            this.panel1.Location = new System.Drawing.Point(0, 0);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(775, 28);
+            this.panel1.TabIndex = 1;
             // 
-            // splitContainer1.Panel1
+            // btnClear
             // 
-            this.splitContainer1.Panel1.Controls.Add(this.txtEditor);
+            this.btnClear.Location = new System.Drawing.Point(3, 3);
+            this.btnClear.Name = "btnClear";
+            this.btnClear.Size = new System.Drawing.Size(104, 23);
+            this.btnClear.TabIndex = 0;
+            this.btnClear.Text = "Clear Console";
+            this.btnClear.UseVisualStyleBackColor = true;
+            this.btnClear.Click += new System.EventHandler(this.btnClear_Click);
             // 
-            // splitContainer1.Panel2
+            // toolStripSeparator7
             // 
-            this.splitContainer1.Panel2.Controls.Add(this.panConsoleArea);
-            this.splitContainer1.Size = new System.Drawing.Size(775, 448);
-            this.splitContainer1.SplitterDistance = 251;
-            this.splitContainer1.TabIndex = 15;
+            this.toolStripSeparator7.Name = "toolStripSeparator7";
+            this.toolStripSeparator7.Size = new System.Drawing.Size(6, 36);
             // 
-            // tmrBackup
+            // btnConsoleVisible
             // 
-            this.tmrBackup.Tick += new System.EventHandler(this.tmrBackup_Tick);
+            this.btnConsoleVisible.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.btnConsoleVisible.Image = ((System.Drawing.Image)(resources.GetObject("btnConsoleVisible.Image")));
+            this.btnConsoleVisible.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnConsoleVisible.Name = "btnConsoleVisible";
+            this.btnConsoleVisible.Size = new System.Drawing.Size(91, 33);
+            this.btnConsoleVisible.Text = "Console Visible";
+            this.btnConsoleVisible.Click += new System.EventHandler(this.btnConsoleVisible_Click);
+            // 
+            // debugConsole
+            // 
+            this.debugConsole.AnnounceColour = System.Drawing.Color.Magenta;
+            this.debugConsole.BackColor = System.Drawing.Color.Black;
+            this.debugConsole.DefaultHeader = "== Welcome to SLaDE ==";
+            this.debugConsole.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.debugConsole.ErrorColour = System.Drawing.Color.Red;
+            this.debugConsole.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.debugConsole.ForeColor = System.Drawing.Color.WhiteSmoke;
+            this.debugConsole.Location = new System.Drawing.Point(0, 28);
+            this.debugConsole.Name = "debugConsole";
+            this.debugConsole.NormalTextColour = System.Drawing.Color.WhiteSmoke;
+            this.debugConsole.Size = new System.Drawing.Size(775, 171);
+            this.debugConsole.SuccessColour = System.Drawing.Color.Green;
+            this.debugConsole.TabIndex = 2;
+            this.debugConsole.Text = "";
+            this.debugConsole.WarningColour = System.Drawing.Color.Yellow;
             // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(775, 530);
-            this.Controls.Add(this.splitContainer1);
+            this.Controls.Add(this.mainContainer);
             this.Controls.Add(this.tsControls);
             this.Controls.Add(this.msMenu);
             this.Controls.Add(this.ssData);
@@ -535,28 +523,22 @@
             this.Load += new System.EventHandler(this.frmMain_Load);
             this.tsControls.ResumeLayout(false);
             this.tsControls.PerformLayout();
-            this.panConsoleArea.ResumeLayout(false);
-            this.panConsoleArea.PerformLayout();
-            this.panInput.ResumeLayout(false);
-            this.panInput.PerformLayout();
             this.msMenu.ResumeLayout(false);
             this.msMenu.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.txtEditor)).EndInit();
             this.ssData.ResumeLayout(false);
             this.ssData.PerformLayout();
-            this.splitContainer1.Panel1.ResumeLayout(false);
-            this.splitContainer1.Panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
-            this.splitContainer1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.txtEditor)).EndInit();
+            this.mainContainer.Panel1.ResumeLayout(false);
+            this.mainContainer.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.mainContainer)).EndInit();
+            this.mainContainer.ResumeLayout(false);
+            this.panel1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
         }
 
         #endregion
-        private System.Windows.Forms.TextBox txtOutput;
-        private System.Windows.Forms.TextBox txtInput;
-        private System.Windows.Forms.Button btnInput;
         private System.Windows.Forms.ToolStrip tsControls;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripButton btnNew;
@@ -566,14 +548,10 @@
         private System.Windows.Forms.ToolStripButton btnRun;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.ToolStripLabel lblStatus;
-        private System.Windows.Forms.Panel panConsoleArea;
-        private System.Windows.Forms.Panel panInput;
         private System.Windows.Forms.MenuStrip msMenu;
         private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem licensingToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem freeIconsByIcons8ToolStripMenuItem;
-        private FastColoredTextBoxNS.FastColoredTextBox txtEditor;
-        private System.Windows.Forms.LinkLabel lnkClearConsole;
         private System.Windows.Forms.ToolStripButton btnClips;
         private System.Windows.Forms.ToolStripMenuItem toolsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem checkScriptTaskStatusToolStripMenuItem;
@@ -588,7 +566,6 @@
         private System.Windows.Forms.ToolStripMenuItem openToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
-        private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem2;
         private System.Windows.Forms.Timer tmrBackup;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem3;
@@ -599,6 +576,13 @@
         private System.Windows.Forms.ToolStripMenuItem colourSelectorToolStripMenuItem;
         private System.Windows.Forms.ToolStripButton btnFind;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
+        private FastColoredTextBoxNS.FastColoredTextBox txtEditor;
+        private System.Windows.Forms.SplitContainer mainContainer;
+        private System.Windows.Forms.Panel panel1;
+        private SladeConsole debugConsole;
+        private System.Windows.Forms.Button btnClear;
+        private System.Windows.Forms.ToolStripButton btnConsoleVisible;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator7;
     }
 }
 

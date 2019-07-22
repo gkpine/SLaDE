@@ -40,10 +40,13 @@
             this.chkUseOldSelector = new System.Windows.Forms.CheckBox();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.chkSyntaxHighlight = new System.Windows.Forms.CheckBox();
+            this.groupBox5 = new System.Windows.Forms.GroupBox();
+            this.chkClearConsole = new System.Windows.Forms.CheckBox();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.groupBox4.SuspendLayout();
+            this.groupBox5.SuspendLayout();
             this.SuspendLayout();
             // 
             // groupBox1
@@ -161,11 +164,33 @@
             this.chkSyntaxHighlight.UseVisualStyleBackColor = true;
             this.chkSyntaxHighlight.CheckedChanged += new System.EventHandler(this.chkSyntaxHighlight_CheckedChanged);
             // 
+            // groupBox5
+            // 
+            this.groupBox5.Controls.Add(this.chkClearConsole);
+            this.groupBox5.Location = new System.Drawing.Point(12, 314);
+            this.groupBox5.Name = "groupBox5";
+            this.groupBox5.Size = new System.Drawing.Size(275, 63);
+            this.groupBox5.TabIndex = 4;
+            this.groupBox5.TabStop = false;
+            this.groupBox5.Text = "Console";
+            // 
+            // chkClearConsole
+            // 
+            this.chkClearConsole.AutoSize = true;
+            this.chkClearConsole.Location = new System.Drawing.Point(21, 26);
+            this.chkClearConsole.Name = "chkClearConsole";
+            this.chkClearConsole.Size = new System.Drawing.Size(216, 17);
+            this.chkClearConsole.TabIndex = 0;
+            this.chkClearConsole.Text = "Clear console on each new script run";
+            this.chkClearConsole.UseVisualStyleBackColor = true;
+            this.chkClearConsole.CheckedChanged += new System.EventHandler(this.chkClearConsole_CheckedChanged);
+            // 
             // frmSettings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(299, 322);
+            this.ClientSize = new System.Drawing.Size(299, 388);
+            this.Controls.Add(this.groupBox5);
             this.Controls.Add(this.groupBox4);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
@@ -184,6 +209,8 @@
             this.groupBox3.PerformLayout();
             this.groupBox4.ResumeLayout(false);
             this.groupBox4.PerformLayout();
+            this.groupBox5.ResumeLayout(false);
+            this.groupBox5.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -201,5 +228,7 @@
         private System.Windows.Forms.CheckBox chkUseOldSelector;
         private System.Windows.Forms.GroupBox groupBox4;
         private System.Windows.Forms.CheckBox chkSyntaxHighlight;
+        private System.Windows.Forms.GroupBox groupBox5;
+        private System.Windows.Forms.CheckBox chkClearConsole;
     }
 }

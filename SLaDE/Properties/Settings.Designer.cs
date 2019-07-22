@@ -94,5 +94,17 @@ namespace SLaDE.Properties {
                 this["UseSyntaxHighlighting"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool ClearConsoleOnScriptRun {
+            get {
+                return ((bool)(this["ClearConsoleOnScriptRun"]));
+            }
+            set {
+                this["ClearConsoleOnScriptRun"] = value;
+            }
+        }
     }
 }

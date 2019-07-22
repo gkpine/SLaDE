@@ -46,6 +46,7 @@ namespace SLaDE
             chkBackups.Checked = Properties.Settings.Default.Backups;
             chkUseOldSelector.Checked = Properties.Settings.Default.UseOldSelector;
             chkSyntaxHighlight.Checked = Properties.Settings.Default.UseSyntaxHighlighting;
+            chkClearConsole.Checked = Properties.Settings.Default.ClearConsoleOnScriptRun;
 
             txtMinutes.Text = Properties.Settings.Default.BackupMins.ToString();
             txtMinutes.Enabled = chkBackups.Checked;
@@ -82,6 +83,14 @@ namespace SLaDE
         private void chkSyntaxHighlight_CheckedChanged(object sender, EventArgs e)
         {
             Properties.Settings.Default.UseSyntaxHighlighting = chkSyntaxHighlight.Checked;
+            Properties.Settings.Default.Save();
+
+            parent.OnSettingsChanged();
+        }
+
+        private void chkClearConsole_CheckedChanged(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.ClearConsoleOnScriptRun = chkClearConsole.Checked;
             Properties.Settings.Default.Save();
 
             parent.OnSettingsChanged();

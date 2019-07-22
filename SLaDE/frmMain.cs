@@ -14,6 +14,8 @@ using WinSiphon;
 using System.Threading;
 using FastColoredTextBoxNS;
 using System.Text.RegularExpressions;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace SLaDE
 {
@@ -23,6 +25,8 @@ namespace SLaDE
 
     public partial class frmMain : Form
     {
+        private const string ConsoleTitle = "SLaDE Console";
+
         public const string CurrentVersion = "alpha2.02";
         public const string UpdateURL = "https://www.sythe.org/threads/slade-alpha-release-testing-but-kinda-sorta-stable/";
 
@@ -35,6 +39,7 @@ namespace SLaDE
         private string DataDirectory;
         private string TessdataDirectory;
         private string BackupDir;
+        private string ReceivedJson = "";
 
         private string currentScriptFile;
 
@@ -94,21 +99,18 @@ namespace SLaDE
             InitializeComponent();
 
             this.FormClosing += FrmMain_FormClosing;
-
-            txtInput.KeyDown += TxtInput_KeyDown;
             txtEditor.TextChanged += TxtEditor_TextChanged;
+            debugConsole.UserInputEntered += DebugConsole_UserInputEntered;
 
             InitVariables();
             CheckFilesAndFolders();
 
-            ClearConsole();
-            ChangeStatus("Idle.", Color.Blue);
-
-            txtOutput.DeselectAll();
-
             txtEditor.Language = FastColoredTextBoxNS.Language.Custom;
 
             ApplySettings();
+
+            debugConsole.DefaultHeader = "== Welcome to SLaDE ==";
+            debugConsole.PrintHeader();
         }
 
         #endregion
@@ -167,6 +169,11 @@ namespace SLaDE
 
         #region Main toolbar
 
+        private void btnConsoleVisible_Click(object sender, EventArgs e)
+        {
+            mainContainer.Panel2Collapsed = !mainContainer.Panel2Collapsed;
+        }
+
         private void btnFind_Click(object sender, EventArgs e)
         {
             txtEditor.ShowFindDialog();
@@ -192,7 +199,13 @@ namespace SLaDE
 
         private async void btnRun_Click(object sender, EventArgs e)
         {
-            if (ScriptTask != null && ScriptTask.Status == TaskStatus.Running) { KillSytheLib(); return; }
+            if (ScriptTask != null && ScriptTask.Status == TaskStatus.Running)
+            {
+                KillSytheLib();
+                Application.DoEvents();
+                SystemLog("Script manually stopped.", debugConsole.WarningColour);
+                return;
+            }
 
             currentScriptFile = DataDirectory + Guid.NewGuid().ToString() + ".txt";
             string fullscript = txtEditor.Text + "\n//<SCRIPT END>\n";
@@ -200,8 +213,6 @@ namespace SLaDE
             if (GlobalHwnd != "N/A") fullscript = "global GUI_PASSED_HWND = " + GlobalHwnd + ";\n" + fullscript;
 
             File.WriteAllText(currentScriptFile, fullscript);
-
-            txtInput.Focus();
 
             btnRun.Image = Properties.Resources.Stop_16px;
 
@@ -213,9 +224,11 @@ namespace SLaDE
             ChangeStatus("Running.", Color.Blue);
             isRunning = true;
 
+            if (Properties.Settings.Default.ClearConsoleOnScriptRun) debugConsole.ClearConsole();
+
             await ScriptTask;
 
-            ScriptThreadStatus();
+            //ScriptThreadStatus();
             KillSytheLib();
         }
 
@@ -295,6 +308,7 @@ namespace SLaDE
             tmrBackup.Enabled = Properties.Settings.Default.Backups;
             tmrBackup.Interval = Properties.Settings.Default.BackupMins * 60000;
             tmrBackgroundMonitor.Enabled = Properties.Settings.Default.MouseCoordinates;
+            lblCoordinates.Visible = Properties.Settings.Default.MouseCoordinates;
         }
 
         private void SettingsFormDialog(frmMain parent)
@@ -313,6 +327,7 @@ namespace SLaDE
         {
             CheckForUpdates();
         }
+
         private void FrmMain_FormClosing(object sender, FormClosingEventArgs e)
         {
             foreach (string file in Directory.GetFiles(DataDirectory))
@@ -372,82 +387,84 @@ namespace SLaDE
 
         #endregion
 
-        #region Console
-
-        private void ClearConsole()
-        {
-            ChangeStatus("Clearing console...", Color.Blue);
-            txtOutput.Text = "SYSTEM: Welcome to SLaDE." + Environment.NewLine;
-            ChangeStatus("Idle.", Color.Blue);
-        }
-
-        private void lnkClearConsole_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            ClearConsole();
-        }
-
-        private void TxtInput_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode == Keys.Enter) btnInput.PerformClick();
-        }
-
-        private void btnInput_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                proc.StandardInput.WriteLine(txtInput.Text);
-                log("INPUT: " + txtInput.Text);
-                txtInput.Text = "";
-
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                ChangeStatus("Error sending input.", Color.Red);
-            }
-
-
-        }
-
-        private void ConsoleAutoScroll()
-        {
-            if (txtOutput.InvokeRequired)
-            {
-                txtOutput.Invoke(new MethodInvoker(() =>
-                {
-                    txtOutput.SelectionStart = txtOutput.Text.Length - 1;
-                    txtOutput.ScrollToCaret();
-                }));
-            }
-            else
-            {
-                txtOutput.SelectionStart = txtOutput.Text.Length - 1;
-                txtOutput.ScrollToCaret();
-            }
-        }
-
-        #endregion
-
         #region Process Events
 
-        private void ManageData(string data)
+        private void ManageStdErrData(string data)
         {
             if (string.IsNullOrEmpty(data)) return;
             if (string.IsNullOrWhiteSpace(data)) return;
-            //if (!data.StartsWith("Load") || !data.StartsWith("\"")) log("SCRIPT: " + data);
-            log(data);
-            ConsoleAutoScroll();
+
+            if (data.StartsWith("{"))
+            {
+                ReceivedJson = "";
+            }
+
+            ReceivedJson += data;
+
+            if (ReceivedJson.EndsWith("}"))
+            {         
+                if (Utilities.CheckBalancedBrackets(ReceivedJson))
+                {
+                    EndOfTransmissionHandler();
+                }
+            }
+
+        }
+
+        private void EndOfTransmissionHandler()
+        {
+            JObject jsonObj = JObject.Parse(ReceivedJson);
+
+            bool error = Utilities.BoolFromString((string)jsonObj.SelectToken("error"));
+            bool fatal = Utilities.BoolFromString((string)jsonObj.SelectToken("fatal"));
+            string message = (string)jsonObj.SelectToken("message");
+            string dataClass = (string)jsonObj.SelectToken("data_class");
+            string dataLine = (string)jsonObj.SelectToken("data.line");
+            string dataCol = (string)jsonObj.SelectToken("data.column");
+            string returnValue = (string)jsonObj.SelectToken("data.return_value");
+
+            System.Threading.Thread.Sleep(10);
+
+            if (!error && fatal)
+            {
+                SystemLog("Return value, if any, was: " + returnValue.ToString(), debugConsole.NormalTextColour);
+                SystemLog(message, debugConsole.SuccessColour);
+            }
+            else if (error && fatal)
+            {
+                if (dataLine != null && dataCol != null) SystemLog(string.Format("Error detected at line {0}, column {1}.", dataLine, dataCol), debugConsole.ErrorColour);
+                else SystemLog("Could not determine error line or column.", debugConsole.ErrorColour);
+
+                if (message != null) SystemLog(message, debugConsole.ErrorColour);
+                else SystemLog("No error message associated with this error.", debugConsole.ErrorColour);
+
+                if (dataClass != null) SystemLog("Error type: " + dataClass, debugConsole.ErrorColour);
+                else SystemLog("No error type associated with this error.", debugConsole.ErrorColour);
+            }
+            else if (error && !fatal)
+            {
+                if (message != null) SystemLog(message, debugConsole.WarningColour);
+                if (dataClass != null) SystemLog("Data class: " + dataClass, debugConsole.WarningColour);
+            }
+        }
+
+        private void ManageStdOutData(string data)
+        {
+            if (string.IsNullOrEmpty(data)) return;
+            if (string.IsNullOrWhiteSpace(data)) return;
+
+            ScriptLog(data, debugConsole.NormalTextColour);
         }
 
         private void Proc_ErrorDataReceived(object sender, DataReceivedEventArgs e)
         {
             if (SilentPipe) return;
-            ManageData(e.Data);
+            ManageStdErrData(e.Data);
         }
 
         private void Proc_OutputDataReceived(object sender, DataReceivedEventArgs e)
         {
-            ManageData(e.Data);
+            ManageStdOutData(e.Data);
         }
 
         private void Proc_Exited(object sender, EventArgs e)
@@ -457,12 +474,33 @@ namespace SLaDE
 
         #endregion
 
-        #region Status and Logging
+        #region Status, Logging, and Console
+
+        private void btnClear_Click(object sender, EventArgs e)
+        {
+            debugConsole.ClearConsole();
+        }
+
+        private void DebugConsole_UserInputEntered(object sender, EventArgs e)
+        {
+            try
+            {
+                if (proc != null && isRunning)
+                {
+                    proc.StandardInput.WriteLine(debugConsole.GetUserInput());
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ChangeStatus("Error sending input.", Color.Red);
+            }
+        }
 
         private void ScriptThreadStatus()
         {
-            if (ScriptTask == null) log("SYSTEM: Script thread has yet to be initialised.");
-            else log("SYSTEM: Current script thread status is \"" + ScriptTask.Status.ToString() + "\".");
+            if (ScriptTask == null) log("SYSTEM: Script thread has yet to be initialised.", debugConsole.ErrorColour);
+            else log("SYSTEM: Current script thread status is \"" + ScriptTask.Status.ToString() + "\".", debugConsole.SuccessColour);
         }
 
         private void ChangeStatus(string text, Color color)
@@ -480,21 +518,25 @@ namespace SLaDE
                 lblStatus.ForeColor = color;
                 lblStatus.Text = "Status: " + text;
             }
-
-
         }
 
-        private void log(string text)
+        private void SystemLog(string text, Color colour)
         {
-            if (txtOutput.InvokeRequired)
-                txtOutput.Invoke(new MethodInvoker(() =>
-                {
-                    txtOutput.Text += (text + Environment.NewLine);
-                }));
-            else
-                txtOutput.Text += (text + Environment.NewLine);
+            string timestamp = DateTime.Now.ToLongTimeString();
+            string print = string.Format("[{0}] [{1}] {2}", timestamp, "SYSTEM", text);
+            log(print, colour);
+        }
 
-            ConsoleAutoScroll();
+        private void ScriptLog(string text, Color colour)
+        {
+            string timestamp = DateTime.Now.ToShortTimeString();
+            string print = string.Format("[{0}] [{1}] {2}", timestamp, "SCRIPT", text);
+            log(print, colour);
+        }
+
+        private void log(string text, Color colour)
+        {
+            debugConsole.Print(text, colour);
         }
 
         #endregion
@@ -523,6 +565,9 @@ namespace SLaDE
 
             try
             {
+                currentScriptFile = "\"" + currentScriptFile + "\"";
+
+
                 bool start = proc.Start();
                 isRunning = start;
 
@@ -536,12 +581,12 @@ namespace SLaDE
                 else
                 {
                     if (!silent) ChangeStatus("Error starting SytheLib. Check console.", Color.Red);
-                    if (!silent) log("SYSTEM: Error starting SytheLib.");
+                    if (!silent) log("SYSTEM: Error starting SytheLib.", debugConsole.ErrorColour);
                 }
             }
             catch (Exception ex)
             {
-                log("SYSTEM: " + ex.Message);
+                log("SYSTEM: " + ex.Message, debugConsole.ErrorColour);
             }
 
         }
@@ -709,5 +754,6 @@ namespace SLaDE
         }
 
         #endregion
+
     }
 }
