@@ -16,6 +16,11 @@ using FastColoredTextBoxNS;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using ICSharpCode.AvalonEdit;
+using System.Reflection;
+using System.Xml;
+using ICSharpCode.AvalonEdit.Highlighting.Xshd;
+using ICSharpCode.AvalonEdit.Highlighting;
 
 namespace SLaDE
 {
@@ -35,12 +40,7 @@ namespace SLaDE
         // stored as such.
         public string GlobalHwnd = "N/A";
 
-        private string SytheLibExecutable;
-        private string DataDirectory;
-        private string TessdataDirectory;
-        private string BackupDir;
         private string ReceivedJson = "";
-
         private string currentScriptFile;
 
         // The SytheLibProt.exe instance
@@ -55,15 +55,6 @@ namespace SLaDE
         // based tools
         private bool SilentPipe = false;
 
-        TextStyle DarkBlueStyle = new TextStyle(Brushes.DarkBlue, null, FontStyle.Regular);
-        TextStyle BlueStyle = new TextStyle(Brushes.Blue, null, FontStyle.Regular);
-        TextStyle GrayStyle = new TextStyle(Brushes.Gray, null, FontStyle.Regular);
-        TextStyle MagentaStyle = new TextStyle(Brushes.Magenta, null, FontStyle.Regular);
-        TextStyle GreenStyle = new TextStyle(Brushes.Green, null, FontStyle.Regular);
-        TextStyle BrownStyle = new TextStyle(Brushes.Brown, null, FontStyle.Regular);
-        TextStyle MaroonStyle = new TextStyle(Brushes.Maroon, null, FontStyle.Regular);
-        MarkerStyle SameWordsStyle = new MarkerStyle(new SolidBrush(Color.FromArgb(40, Color.Gray)));
-
         private enum Selector
         {
             SLBitmap, SLColour, BluBitmap, BluColour
@@ -73,20 +64,16 @@ namespace SLaDE
 
         private void InitVariables()
         {
-            DataDirectory = Environment.CurrentDirectory + "\\data\\";
-            SytheLibExecutable = "SytheLibProt.exe";
             currentScriptFile = "";
-            TessdataDirectory = Environment.CurrentDirectory + "\\tessdata\\";
-            BackupDir = Environment.CurrentDirectory + "\\backups\\";
         }
 
         private void CheckFilesAndFolders()
         {
-            Startup.CheckDataDir(DataDirectory);
-            Startup.CheckBackupDir(BackupDir);
+            Startup.CheckDataDir(Constants.DataPath);
+            Startup.CheckBackupDir(Constants.BackupsPath);
 
             // both of the following conditions have to be true for the run button to be enabled
-            bool canRun = Startup.CheckSLExecutable(SytheLibExecutable) && Startup.CheckTessdataDir(TessdataDirectory);
+            bool canRun = Startup.CheckSLExecutable(Constants.SytheLibPath) && Startup.CheckTessdataDir(Constants.TessdataPath);
             btnRun.Enabled = canRun;
         }
 
@@ -169,11 +156,6 @@ namespace SLaDE
 
         #region Main toolbar
 
-        private void btnConsoleVisible_Click(object sender, EventArgs e)
-        {
-            mainContainer.Panel2Collapsed = !mainContainer.Panel2Collapsed;
-        }
-
         private void btnFind_Click(object sender, EventArgs e)
         {
             txtEditor.ShowFindDialog();
@@ -207,7 +189,7 @@ namespace SLaDE
                 return;
             }
 
-            currentScriptFile = DataDirectory + Guid.NewGuid().ToString() + ".txt";
+            currentScriptFile = Constants.DataPath + Guid.NewGuid().ToString() + ".txt";
             string fullscript = txtEditor.Text + "\n//<SCRIPT END>\n";
 
             if (GlobalHwnd != "N/A") fullscript = "global GUI_PASSED_HWND = " + GlobalHwnd + ";\n" + fullscript;
@@ -230,12 +212,6 @@ namespace SLaDE
 
             //ScriptThreadStatus();
             KillSytheLib();
-        }
-
-        private void btnClips_Click(object sender, EventArgs e)
-        {
-            frmClips frm = new frmClips();
-            frm.ShowDialog();
         }
 
         private void SaveScript()
@@ -330,7 +306,7 @@ namespace SLaDE
 
         private void FrmMain_FormClosing(object sender, FormClosingEventArgs e)
         {
-            foreach (string file in Directory.GetFiles(DataDirectory))
+            foreach (string file in Directory.GetFiles(Constants.DataPath))
                 if (file.EndsWith(".txt")) File.Delete(file);
 
 
@@ -350,38 +326,10 @@ namespace SLaDE
         {
             if (txtEditor.Text == "") isDirty = false;
             else isDirty = true;
-            
+
             if (Properties.Settings.Default.UseSyntaxHighlighting)
             {
-                txtEditor.LeftBracket = '(';
-                txtEditor.RightBracket = ')';
-                txtEditor.LeftBracket2 = '\x0';
-                txtEditor.RightBracket2 = '\x0';
-                //clear style of changed range
-                e.ChangedRange.ClearStyle(BlueStyle, GrayStyle, MagentaStyle, GreenStyle, BrownStyle);
-
-                //string highlighting
-                e.ChangedRange.SetStyle(BrownStyle, @"""""|@""""|''|@"".*?""|(?<!@)(?<range>"".*?[^\\]"")|'.*?[^\\]'");
-                //comment highlighting
-                e.ChangedRange.SetStyle(GreenStyle, @"//.*$", RegexOptions.Multiline);
-                e.ChangedRange.SetStyle(GreenStyle, @"(/\*.*?\*/)|(/\*.*)", RegexOptions.Singleline);
-                e.ChangedRange.SetStyle(GreenStyle, @"(/\*.*?\*/)|(.*\*/)", RegexOptions.Singleline | RegexOptions.RightToLeft);
-                //number highlighting
-                e.ChangedRange.SetStyle(MagentaStyle, @"\b\d+[\.]?\d*([eE]\-?\d+)?[lLdDfF]?\b|\b0x[a-fA-F\d]+\b");
-                //attribute highlighting
-                e.ChangedRange.SetStyle(GrayStyle, @"^\s*(?<range>\[.+?\])\s*$", RegexOptions.Multiline);
-                //class name highlighting
-                e.ChangedRange.SetStyle(DarkBlueStyle, @"\b(class|struct|enum|interface)\s+(?<range>\w+?)\b");
-                //keyword highlighting
-                e.ChangedRange.SetStyle(BlueStyle, @"\b(auto|abstract|def|as|base|bool|break|byte|case|catch|char|checked|class|const|continue|decimal|default|delegate|do|double|else|enum|event|explicit|extern|false|finally|fixed|float|for|foreach|goto|if|implicit|in|int|interface|internal|is|lock|long|namespace|new|null|object|operator|out|override|params|private|protected|public|readonly|ref|return|sbyte|sealed|short|sizeof|stackalloc|static|string|struct|switch|this|throw|true|try|typeof|uint|ulong|unchecked|unsafe|ushort|using|virtual|void|volatile|while|add|alias|ascending|descending|dynamic|from|get|global|group|into|join|let|orderby|partial|remove|select|set|value|var|where|yield)\b|#region\b|#endregion\b");
-
-                //clear folding markers
-                e.ChangedRange.ClearFoldingMarkers();
-
-                //set folding markers
-                e.ChangedRange.SetFoldingMarkers("{", "}");//allow to collapse brackets block
-                e.ChangedRange.SetFoldingMarkers(@"#region\b", @"#endregion\b");//allow to collapse #region blocks
-                e.ChangedRange.SetFoldingMarkers(@"/\*", @"\*/");//allow to collapse comment block
+                Utilities.ImplementSyntaxHighlighting(ref txtEditor, ref e);
             }
         }
 
@@ -402,7 +350,7 @@ namespace SLaDE
             ReceivedJson += data;
 
             if (ReceivedJson.EndsWith("}"))
-            {         
+            {
                 if (Utilities.CheckBalancedBrackets(ReceivedJson))
                 {
                     EndOfTransmissionHandler();
@@ -476,11 +424,6 @@ namespace SLaDE
 
         #region Status, Logging, and Console
 
-        private void btnClear_Click(object sender, EventArgs e)
-        {
-            debugConsole.ClearConsole();
-        }
-
         private void DebugConsole_UserInputEntered(object sender, EventArgs e)
         {
             try
@@ -549,7 +492,7 @@ namespace SLaDE
             if (!silent) ChangeStatus("Spawning SytheLib process...", Color.Blue);
 
             proc = new Process();
-            proc.StartInfo.FileName = SytheLibExecutable;
+            proc.StartInfo.FileName = Constants.SytheLibPath;
             proc.StartInfo.Arguments = "\"" + currentScriptFile + "\"";
 
             proc.StartInfo.CreateNoWindow = true;
@@ -607,6 +550,18 @@ namespace SLaDE
         #endregion
 
         #region Menu
+
+        private void codeClipBinToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            frmClips frm = new frmClips();
+            frm.ShowDialog();
+        }
+
+        private void sytheLibDocumentationToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            frmDocsViewer frm = new frmDocsViewer();
+            frm.ShowDialog();
+        }
 
         private void colourSelectorToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -678,6 +633,16 @@ namespace SLaDE
             Environment.Exit(0);
         }
 
+        private void clearConsoleToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            debugConsole.ClearConsole();
+        }
+
+        private void toggleShowConsoleToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            mainContainer.Panel2Collapsed = !mainContainer.Panel2Collapsed;
+        }
+
         #endregion
 
         #region Status strip
@@ -693,20 +658,20 @@ namespace SLaDE
 
         private void tmrBackup_Tick(object sender, EventArgs e)
         {
-            Startup.CheckBackupDir(BackupDir);
+            Startup.CheckBackupDir(Constants.BackupsPath);
 
             if (Properties.Settings.Default.Backups)
             {
                 string orig_filename = DateTime.Now.ToString();
                 string filename = orig_filename;
                 int counter = 2;
-                while (File.Exists(BackupDir + filename + ".txt"))
+                while (File.Exists(Constants.BackupsPath + filename + ".txt"))
                 {
                     filename = orig_filename + "_" + counter.ToString();
                     counter++;
                 }
 
-                File.WriteAllText(BackupDir + filename.Replace(":", ";") + ".txt", txtEditor.Text);
+                File.WriteAllText(Constants.BackupsPath + filename.Replace(":", ";") + ".txt", txtEditor.Text);
             }
         }
 
@@ -754,6 +719,7 @@ namespace SLaDE
         }
 
         #endregion
+
 
     }
 }

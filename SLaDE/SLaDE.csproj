@@ -42,6 +42,9 @@
     <Reference Include="FastColoredTextBox, Version=2.16.21.0, Culture=neutral, PublicKeyToken=fb8aa12b994ef61b, processorArchitecture=MSIL">
       <HintPath>..\packages\FCTB.2.16.21.0\lib\FastColoredTextBox.dll</HintPath>
     </Reference>
+    <Reference Include="ICSharpCode.AvalonEdit">
+      <HintPath>..\packages\AvalonEdit.5.0.4\lib\Net40\ICSharpCode.AvalonEdit.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.11.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
@@ -65,6 +68,8 @@
     <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Constants.cs" />
+    <Compile Include="Documentation.cs" />
     <Compile Include="frmAddNewClip.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -76,6 +81,12 @@
     </Compile>
     <Compile Include="frmClips.Designer.cs">
       <DependentUpon>frmClips.cs</DependentUpon>
+    </Compile>
+    <Compile Include="frmDocsViewer.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmDocsViewer.Designer.cs">
+      <DependentUpon>frmDocsViewer.cs</DependentUpon>
     </Compile>
     <Compile Include="frmHandleSelector.cs">
       <SubType>Form</SubType>
@@ -110,6 +121,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="frmClips.resx">
       <DependentUpon>frmClips.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmDocsViewer.resx">
+      <DependentUpon>frmDocsViewer.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="frmHandleSelector.resx">
       <DependentUpon>frmHandleSelector.cs</DependentUpon>

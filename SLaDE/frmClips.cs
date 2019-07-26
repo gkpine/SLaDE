@@ -13,23 +13,20 @@ namespace SLaDE
 {
     public partial class frmClips : Form
     {
-        string clipsdir = "";
-
         public frmClips()
         {
             InitializeComponent();
-            clipsdir = Environment.CurrentDirectory + "\\clips\\";
-            Startup.CheckClipsDir(clipsdir);
+            Startup.CheckClipsDir(Constants.ClipsPath);
             lstClipNames.Sorted = true;
-            RefreshClipBin(clipsdir);
+            RefreshClipBin(Constants.ClipsPath);
         }  
 
         private void btnAdd_Click(object sender, EventArgs e)
         {
-            frmAddNewClip frm = new frmAddNewClip(clipsdir);
+            frmAddNewClip frm = new frmAddNewClip(Constants.ClipsPath);
             if (frm.ShowDialog() != DialogResult.OK) return;
             
-            RefreshClipBin(clipsdir);
+            RefreshClipBin(Constants.ClipsPath);
         }
 
         private void btnCopy_Click(object sender, EventArgs e)
@@ -48,8 +45,8 @@ namespace SLaDE
             var result = MessageBox.Show("Are you sure you want to delete this clip? This will also delete the clip file.", "Delete", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
             if (result != DialogResult.Yes) return;
 
-            File.Delete(clipsdir + lstClipNames.SelectedItem.ToString());
-            RefreshClipBin(clipsdir);
+            File.Delete(Constants.ClipsPath + lstClipNames.SelectedItem.ToString());
+            RefreshClipBin(Constants.ClipsPath);
 
             txtClip.Text = "";
         }
@@ -79,10 +76,10 @@ namespace SLaDE
             if (lstClipNames.SelectedIndex < 0) return;
                 
 
-            frmAddNewClip frm = new frmAddNewClip("Edit Clip", lstClipNames.SelectedItem.ToString(), txtClip.Text, clipsdir);
+            frmAddNewClip frm = new frmAddNewClip("Edit Clip", lstClipNames.SelectedItem.ToString(), txtClip.Text, Constants.ClipsPath);
             if (frm.ShowDialog() != DialogResult.OK) return;
 
-            RefreshClipBin(clipsdir);
+            RefreshClipBin(Constants.ClipsPath);
         }
 
         private void lstClipNames_SelectedIndexChanged(object sender, EventArgs e)
@@ -93,7 +90,7 @@ namespace SLaDE
                 return;
             }
 
-            txtClip.Text = File.ReadAllText(clipsdir + lstClipNames.SelectedItem.ToString());
+            txtClip.Text = File.ReadAllText(Constants.ClipsPath + lstClipNames.SelectedItem.ToString());
         }
 
         private void lnkClear_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
@@ -101,12 +98,12 @@ namespace SLaDE
             var result = MessageBox.Show("Are you sure you want to clear the entire clip library? This will also remove all clip files.", "Clear", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
             if (result != DialogResult.Yes) return;
 
-            foreach(string file in Directory.GetFiles(clipsdir))
+            foreach(string file in Directory.GetFiles(Constants.ClipsPath))
             {
                 File.Delete(file);
             }
 
-            RefreshClipBin(clipsdir);
+            RefreshClipBin(Constants.ClipsPath);
         }
     }
 }

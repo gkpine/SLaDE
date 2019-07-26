@@ -1,8 +1,11 @@
-﻿using System;
+﻿using FastColoredTextBoxNS;
+using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace SLaDE
@@ -19,6 +22,15 @@ namespace SLaDE
         public static extern IntPtr SetParent(IntPtr hWndChild, IntPtr hWndNewParent);
 
         private const int SHOWMAXIMIZED = 5;
+
+        private static TextStyle DarkBlueStyle = new TextStyle(Brushes.DarkBlue, null, FontStyle.Regular);
+        private static TextStyle BlueStyle = new TextStyle(Brushes.Blue, null, FontStyle.Regular);
+        private static TextStyle GrayStyle = new TextStyle(Brushes.Gray, null, FontStyle.Regular);
+        private static TextStyle MagentaStyle = new TextStyle(Brushes.Magenta, null, FontStyle.Regular);
+        private static TextStyle GreenStyle = new TextStyle(Brushes.Green, null, FontStyle.Regular);
+        private static TextStyle BrownStyle = new TextStyle(Brushes.Brown, null, FontStyle.Regular);
+        private static TextStyle MaroonStyle = new TextStyle(Brushes.Maroon, null, FontStyle.Regular);
+        private static MarkerStyle SameWordsStyle = new MarkerStyle(new SolidBrush(Color.FromArgb(40, Color.Gray)));
 
         public static IntPtr GetWindowHandle(string windowTitle)
         {
@@ -117,6 +129,37 @@ namespace SLaDE
             else if (strBool.ToLower().Trim() == "true") return true;
 
             return false;
+        }
+
+        public static void ImplementSyntaxHighlighting(ref FastColoredTextBoxNS.FastColoredTextBox txtEditor, ref FastColoredTextBoxNS.TextChangedEventArgs e)
+        {
+            txtEditor.LeftBracket = '(';
+            txtEditor.RightBracket = ')';
+            txtEditor.LeftBracket2 = '\x0';
+            txtEditor.RightBracket2 = '\x0';
+            //clear style of changed range
+            e.ChangedRange.ClearStyle(BlueStyle, GrayStyle, MagentaStyle, GreenStyle, BrownStyle);
+
+            //string highlighting
+            e.ChangedRange.SetStyle(BrownStyle, @"""""|@""""|''|@"".*?""|(?<!@)(?<range>"".*?[^\\]"")|'.*?[^\\]'");
+            //comment highlighting
+            e.ChangedRange.SetStyle(GreenStyle, @"//.*$", RegexOptions.Multiline);
+            e.ChangedRange.SetStyle(GreenStyle, @"(/\*.*?\*/)|(/\*.*)", RegexOptions.Singleline);
+            e.ChangedRange.SetStyle(GreenStyle, @"(/\*.*?\*/)|(.*\*/)", RegexOptions.Singleline | RegexOptions.RightToLeft);
+            //number highlighting
+            e.ChangedRange.SetStyle(MagentaStyle, @"\b\d+[\.]?\d*([eE]\-?\d+)?[lLdDfF]?\b|\b0x[a-fA-F\d]+\b");
+            //attribute highlighting
+            e.ChangedRange.SetStyle(GrayStyle, @"^\s*(?<range>\[.+?\])\s*$", RegexOptions.Multiline);
+            //class name highlighting
+            e.ChangedRange.SetStyle(DarkBlueStyle, @"\b(class|struct|enum|interface)\s+(?<range>\w+?)\b");
+            //keyword highlighting
+            e.ChangedRange.SetStyle(BlueStyle, @"\b(auto|abstract|def|as|base|bool|break|byte|case|catch|char|checked|class|const|continue|decimal|default|delegate|do|double|else|enum|event|explicit|extern|false|finally|fixed|float|for|foreach|goto|if|implicit|in|int|interface|internal|is|lock|long|namespace|new|null|object|operator|out|override|params|private|protected|public|readonly|ref|return|sbyte|sealed|short|sizeof|stackalloc|static|string|struct|switch|this|throw|true|try|typeof|uint|ulong|unchecked|unsafe|ushort|using|virtual|void|volatile|while|add|alias|ascending|descending|dynamic|from|get|global|group|into|join|let|orderby|partial|remove|select|set|value|var|where|yield)\b|#region\b|#endregion\b");
+
+            //clear folding markers
+            e.ChangedRange.ClearFoldingMarkers();
+
+            //set folding markers
+            e.ChangedRange.SetFoldingMarkers("{", "}");//allow to collapse brackets block
         }
     }
 }
