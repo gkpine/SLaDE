@@ -8,7 +8,7 @@ SLaDE is a development environment built around the C++ interpreted scripting la
 SLaDE allows its users to develop scripts and run them contiguously, as would be expected from any modern IDE such as Visual Studio. SLaDE also comes with tools to make SytheLib script development easier, such as a colour and bitmap selector, a mouse coordinate display, an integrated console for input and output, a clip bin, window handle analyzer (called WinSiphon), with more on the horizon.
 
 ## Planned features
-The most prominent feature on the horizon is a documentation browser. Autocomplete would also be a "nice to have" feature.
-A couple of minor planned features include a better clip bin and a dark theme.
+~~The most prominent feature on the horizon is a documentation browser.~~ Autocomplete would also be a "nice to have" feature.
+A couple of minor planned features include a better clip bin, dark theme, quick doc viewer and quick clip bin embedded in the editor, and a mode dedicated to people who just want to run scripts and don't care about the editor.
 
 ![SLaDE](https://i.imgur.com/ucVV0JO.png)
